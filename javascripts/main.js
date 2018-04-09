@@ -1,6 +1,7 @@
 'use strict';
 
 var container;
+
 var contactButton = document.getElementById("contactButton");
 var backButton = document.getElementById("backButton");
 
@@ -26,6 +27,7 @@ var SEPARATION = 60;
 var AMOUNTX = 50;
 var AMOUNTY = 50;
 var particle;
+var particles, count = 0;
 
 init();
 animate();
@@ -62,48 +64,29 @@ function init() {
 
 
   // FLOOR OF PARTICLES
-  var floorMaterial = new THREE.SpriteMaterial();
+
+  particles = [];
+  var PI2 = Math.PI * 2;
+
+  var floorMaterial = new THREE.SpriteMaterial({
+    color: 0xffffff,
+    program: function (context) {
+      context.beginPath();
+      context.arc(0, 0, 0.5, 0, PI2, true);
+      context.fill();
+    }
+  });
+
+  var i = 0;
   for (var ix = 0; ix < AMOUNTX; ix++) {
     for (var iy = 0; iy < AMOUNTY; iy++) {
-      particle = new THREE.Sprite(floorMaterial);
+      particle = particles[i++] = new THREE.Sprite(floorMaterial);
       particle.scale.y = 7;
       particle.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
       particle.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
       group.add(particle);
     }
   }
-
-
-  // TEXT LAYER
-  // var loader = new THREE.FontLoader();
-  // loader.load('../lib/open_sans_light_regular.json', function (font) {
-  //   var xMid, text;
-  //   var textShape = new THREE.BufferGeometry();
-  //   var color = 0x006699;
-  //   var matDark = new THREE.LineBasicMaterial({
-  //     color: color,
-  //     side: THREE.DoubleSide
-  //   });
-  //   var matLite = new THREE.MeshBasicMaterial({
-  //     color: color,
-  //     transparent: true,
-  //     opacity: 0.4,
-  //     side: THREE.DoubleSide
-  //   });
-  //   var message = "Alex Sanchez";
-  //   var shapes = font.generateShapes(message, 80, 2);
-  //   var geometry = new THREE.ShapeGeometry(shapes);
-  //   geometry.computeBoundingBox();
-  //   xMid = - 0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
-  //   geometry.translate(xMid, 0, 0);
-  //   // make shape ( N.B. edge view not visible )
-  //   textShape.fromGeometry(geometry);
-  //   text = new THREE.Mesh(textShape, matLite);
-  //   text.position.z = - 150;
-  //   scene.add(text);
-  // });
-  // END TEXT LAYER
-
 
   // ISLAND LAYER
   var landGeometry = new THREE.BoxGeometry(90, 550, 90);
@@ -121,9 +104,9 @@ function init() {
   // END SHIP LAYER
 
   // CONTACT LAYER
-  var contactEmpty = new THREE.BoxGeometry(10,10,10);
+  var contactEmpty = new THREE.BoxGeometry(10, 10, 10);
   contactDestination = new THREE.Mesh(contactEmpty);
-  contactDestination.position.set(0, 0, 0);
+  contactDestination.position.set(-200, 50, 0);
   destinationGroup.add(contactDestination);
   // END CONTACT LAYER
 
@@ -149,9 +132,7 @@ function onWindowResize() {
 
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
-
 }
 
 function onDocumentMouseDown(event) {
@@ -170,7 +151,6 @@ function onDocumentMouseDown(event) {
 function onDocumentMouseMove(event) {
 
   mouseX = event.clientX - windowHalfX;
-
   targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
 
 }
@@ -237,12 +217,10 @@ function rotateCamera() {
   var x = camera.position.x,
     z = camera.position.z;
 
-
   camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
   camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
 
   camera.lookAt(scene.position);
-
   camera.updateMatrixWorld();
 }
 
@@ -257,6 +235,39 @@ function rotateShipGroup() {
   ship.lookAt(scene.position);
 }
 
+function goToContactDestination() {
+
+  var x = contactDestination.position.x;
+  var y = contactDestination.position.y;
+  var z = contactDestination.position.z;
+
+  ship.position.x = 55 + x;
+  ship.position.y = -45 + y;
+  ship.position.z = z;
+
+  ship.rotation.y = 0;
+
+  camera.position.x = 250 + x;
+  camera.position.y = 50 + y;
+  camera.position.z = z;
+
+  camera.lookAt(contactDestination.position);
+
+  camera.updateMatrixWorld();
+
+
+  var i = 0;
+  for (var ix = 0; ix < AMOUNTX; ix++) {
+    for (var iy = 0; iy < AMOUNTY; iy++) {
+      particle = particles[i++];
+      particle.position.y = (Math.sin((ix + count) * 0.3) * 15) +
+        (Math.sin((iy + count) * 0.5) * 15);
+      particle.scale.x = particle.scale.y = (Math.sin((ix + count) * 0.3) + 1) * 2 +
+        (Math.sin((iy + count) * 0.5) + 1) * 2;
+    }
+  }
+  count += 0.1;
+}
 
 
 // ACTIVATION
@@ -274,21 +285,11 @@ function render() {
     rotateShipGroup();
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
     shipGroup.rotation.y += (targetRotation - group.rotation.y) * 0.05;
-    renderer.render(scene, camera);
-  } 
-  else if (lookAtContact) {
-
-    var x = contactDestination.position.x;
-    var y = contactDestination.position.y;
-    var z = contactDestination.position.z;
-    console.log(ship.position.x, ship.position.y, ship.position.z);
-
-    ship.position.x = 10 + x;
-    ship.position.y = 15 + y;
-    ship.position.z = 10 + z;
-    ship.lookAt(contactDestination);
-    ship.rotation.y = 0;
-    renderer.render(scene, camera);
   }
+  else if (lookAtContact) {
+    goToContactDestination();
+  }
+
+  renderer.render(scene, camera);
 
 }
