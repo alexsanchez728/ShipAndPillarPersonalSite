@@ -27,7 +27,6 @@ var SEPARATION = 60;
 var AMOUNTX = 50;
 var AMOUNTY = 50;
 var particle;
-var particles, count = 0;
 
 init();
 animate();
@@ -64,23 +63,10 @@ function init() {
 
 
   // FLOOR OF PARTICLES
-
-  particles = [];
-  var PI2 = Math.PI * 2;
-
-  var floorMaterial = new THREE.SpriteMaterial({
-    color: 0xffffff,
-    program: function (context) {
-      context.beginPath();
-      context.arc(0, 0, 0.5, 0, PI2, true);
-      context.fill();
-    }
-  });
-
-  var i = 0;
+  var floorMaterial = new THREE.SpriteMaterial();
   for (var ix = 0; ix < AMOUNTX; ix++) {
     for (var iy = 0; iy < AMOUNTY; iy++) {
-      particle = particles[i++] = new THREE.Sprite(floorMaterial);
+      particle = new THREE.Sprite(floorMaterial);
       particle.scale.y = 7;
       particle.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
       particle.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
@@ -104,7 +90,7 @@ function init() {
   // END SHIP LAYER
 
   // CONTACT LAYER
-  var contactEmpty = new THREE.BoxGeometry(10, 10, 10);
+  var contactEmpty = new THREE.BoxGeometry(10,10,10);
   contactDestination = new THREE.Mesh(contactEmpty);
   contactDestination.position.set(-200, 50, 0);
   destinationGroup.add(contactDestination);
@@ -237,6 +223,7 @@ function rotateShipGroup() {
 
 function goToContactDestination() {
 
+  group.rotation.y = 0;
   var x = contactDestination.position.x;
   var y = contactDestination.position.y;
   var z = contactDestination.position.z;
@@ -249,24 +236,11 @@ function goToContactDestination() {
 
   camera.position.x = 250 + x;
   camera.position.y = 50 + y;
-  camera.position.z = z;
+  camera.position.z =  z;
 
   camera.lookAt(contactDestination.position);
 
   camera.updateMatrixWorld();
-
-
-  var i = 0;
-  for (var ix = 0; ix < AMOUNTX; ix++) {
-    for (var iy = 0; iy < AMOUNTY; iy++) {
-      particle = particles[i++];
-      particle.position.y = (Math.sin((ix + count) * 0.3) * 15) +
-        (Math.sin((iy + count) * 0.5) * 15);
-      particle.scale.x = particle.scale.y = (Math.sin((ix + count) * 0.3) + 1) * 2 +
-        (Math.sin((iy + count) * 0.5) + 1) * 2;
-    }
-  }
-  count += 0.1;
 }
 
 
@@ -285,7 +259,7 @@ function render() {
     rotateShipGroup();
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
     shipGroup.rotation.y += (targetRotation - group.rotation.y) * 0.05;
-  }
+  } 
   else if (lookAtContact) {
     goToContactDestination();
   }
