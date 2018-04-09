@@ -1,0 +1,27 @@
+body {
+  font-family: Monospace;
+  background-color: #4C8BA8;
+  margin: 0px;
+  overflow: hidden;
+}
+#aboutButton, #contactButton, #portfolioButton {
+  position: absolute;
+  background-color: Transparent;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+  padding: 1.5%;
+  text-align: center;
+}
+#aboutButton {
+  top: 8.5%;
+  left: 47.5%;
+}
+#contactButton {
+  top: 48.5%;
+  left: 8.5%;
+}
+#portfolioButton {
+  top: 48.5%;
+  right: 8.5%;
+}
