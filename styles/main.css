@@ -4,7 +4,7 @@ body {
   margin: 0px;
   overflow: hidden; }
 
-#aboutButton, #contactButton, #portfolioButton {
+#about-button, #contact-button, #portfolio-button {
   position: absolute;
   background-color: Transparent;
   border: none;
@@ -13,14 +13,21 @@ body {
   padding: 1.5%;
   text-align: center; }
 
-#aboutButton {
+#about-button {
   top: 8.5%;
   left: 47.5%; }
 
-#contactButton {
+#contact-button {
   top: 48.5%;
   left: 8.5%; }
 
-#portfolioButton {
+#portfolio-button {
   top: 48.5%;
   right: 8.5%; }
+
+#about-blurb {
+  display: none;
+  position: absolute;
+  width: 50%;
+  margin-left: 25%;
+  text-align: center; }
