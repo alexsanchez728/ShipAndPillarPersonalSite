@@ -3,16 +3,10 @@
 var container;
 
 var lookAtHome = true;
-var lookAtContact = false;
 var lookAtAbout = false;
 var lookAtPortfolio = false;
 
-var loader = new THREE.TextureLoader();
-var texture = loader.load('textures/sprites/disc.png');
-
-
 var id;
-var floorMaterial;
 
 var camera, scene, renderer;
 
@@ -66,19 +60,6 @@ function init() {
   destinationGroup = new THREE.Group();
   group.add(destinationGroup);
 
-
-  // FLOOR OF PARTICLES
-  floorMaterial = new THREE.SpriteMaterial();
-  for (var ix = 0; ix < AMOUNTX; ix++) {
-    for (var iy = 0; iy < AMOUNTY; iy++) {
-      particle = new THREE.Sprite(floorMaterial);
-      particle.scale.y = 7;
-      particle.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
-      particle.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
-      group.add(particle);
-    }
-  }
-
   // ISLAND LAYER
   var landGeometry = new THREE.BoxGeometry(90, 550, 90);
   var landMaterial = new THREE.MeshBasicMaterial({ color: 0xCF6A48 });
@@ -91,14 +72,13 @@ function init() {
   var shipMaterial = new THREE.MeshBasicMaterial({ color: 0x4D63DB });
   ship = new THREE.Mesh(shipGeometry, shipMaterial);
   ship.position.set(100, 0, 100);
+  ship.castShadow = true;
   shipGroup.add(ship);
   // END SHIP LAYER
 
   // CONTACT LAYER
   var contactEmpty = new THREE.BoxGeometry(10, 10, 10);
   contactDestination = new THREE.Mesh(contactEmpty);
-  // contactDestination.transparent = true;
-  // contactDestination.opacity = 0;
   contactDestination.position.set(-200, 300, 0);
   destinationGroup.add(contactDestination);
   // END CONTACT LAYER
@@ -120,7 +100,7 @@ function init() {
   $(document).on('touchstart', onDocumentTouchStart);
   $(document).on('touchmove', onDocumentTouchMove);
 
-  $('#contact-button').click(onContactButtonClick);
+  $('#about-button').click(goToAboutDestination);
   $('#portfolio-button').click(onPortfolioButtonClick);
   $('#back-button').click(onBackButtonClick);
 
@@ -128,71 +108,67 @@ function init() {
 
 }
 
-function Sea() {
+function Floor() {
 
   // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-  var cylinderGeom = new THREE.CylinderGeometry(450, 450, 1000, 20, 20);
+  var geom = new THREE.PlaneGeometry(2500, 2500, 45, 45);
 
-  var vertices = cylinderGeom.vertices;
+  // rotate the geometry on the x axis
+  geom.rotateX(- Math.PI / 2);
 
-  cylinderGeom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  var l = geom.vertices.length;
 
-  this.waves = [];
+  this.mountains = [];
 
-  for (var i = 0; i < vertices.length; i++) {
-    var v = vertices[i];
-    this.waves.push({
+  for (var i = 0; i < l; i++) {
+    var v = geom.vertices[i];
+    this.mountains.push({
       y: v.y,
       x: v.x,
       z: v.z,
       ang: Math.random() * Math.PI * 2,
-      amp: 30 + Math.random() * 15,
-      speed: 0.0016 + Math.random() * 0.001
+      amp: 3 + Math.random() * 15
+      // speed: 0.0016 + Math.random() * 0.001
     });
   }
 
-  var pointsMaterial = new THREE.PointsMaterial({
-    color: 0x0080ff,
-    map: texture,
-    size: 16,
-    alphaTest: 0.5
+  // create the material 
+  var mat = new THREE.MeshPhongMaterial({
+    color: 0x68c3c0,
+    transparent: true,
+    opacity: 1,
+    flatShading: true,
   });
 
-  this.mesh = new THREE.Points(cylinderGeom, pointsMaterial);
+  this.mesh = new THREE.Mesh(geom, mat);
+  this.mesh.receiveShadow = true;
+
 }
 
-
-Sea.prototype.moveWaves = function () {
+Floor.prototype.makeMountains = function () {
   var verts = this.mesh.geometry.vertices;
-  var l = verts.length;
+  var vertL = verts.length;
 
-  for (var i = 0; i < l; i++) {
+  for (var i = 0; i < vertL; i++) {
     var v = verts[i];
-    var vprops = this.waves[i];
+    var vprops = this.mountains[i];
 
     v.x = vprops.x + Math.cos(vprops.ang) * vprops.amp;
     v.y = vprops.y + Math.sin(vprops.ang) * vprops.amp;
 
     vprops.ang += vprops.speed;
-
-    this.mesh.geometry.verticesNeedUpdate = true;
-
-    sea.mesh.rotation.z += -0.00003;
   }
 };
 
-var sea;
+var floor;
 
-function createSea() {
-  sea = new Sea();
-
-  // push it a little bit at the bottom of the scene
-  sea.mesh.position.y = -350;
-  sea.mesh.position.x = -120;
-
-  // add the mesh of the sea to the scene
-  contactDestination.add(sea.mesh);
+function createFloor() {
+  floor = new Floor();
+  floor.makeMountains();
+  group.add(floor.mesh);
 }
+createFloor();
+
 
 function Land() {
 
@@ -214,8 +190,8 @@ function Land() {
       x: v.x,
       z: v.z,
       ang: Math.random() * Math.PI * 2,
-      amp: 3 + Math.random() * 15,
-      speed: 0.0016 + Math.random() * 0.001
+      amp: 7 + Math.random() * 15,
+      speed: 0.0006 + Math.random() * 0.0005
     });
   }
 
@@ -228,8 +204,7 @@ function Land() {
   });
 
   this.mesh = new THREE.Mesh(geom, mat);
-  // Allow the sea to receive shadows
-  // this.mesh.receiveShadow = true;
+  this.mesh.receiveShadow = true;
 }
 
 Land.prototype.moveMountains = function () {
@@ -247,7 +222,7 @@ Land.prototype.moveMountains = function () {
 
     this.mesh.geometry.verticesNeedUpdate = true;
 
-    land.mesh.rotation.z += -0.00003;
+    land.mesh.rotation.z += -0.00005;
   }
 };
 
@@ -257,8 +232,8 @@ function createLand() {
   land = new Land();
 
   // push it a little bit at the bottom of the scene
-  land.mesh.position.y = -100;
-  land.mesh.position.x = 180;
+  land.mesh.position.y = -150;
+  land.mesh.position.x = 220;
 
   // add the mesh of the sea to the scene
   contactDestination.add(land.mesh);
@@ -336,12 +311,7 @@ function onDocumentTouchMove(event) {
 
 }
 
-function onContactButtonClick(event) {
-  lookAtHome = false;
-  lookAtContact = true;
-  createSea();
-  loopSea();
-}
+
 function onPortfolioButtonClick(event) {
   lookAtHome = false;
   lookAtPortfolio = true;
@@ -351,7 +321,6 @@ function onPortfolioButtonClick(event) {
 
 function onBackButtonClick(event) {
   lookAtAbout = false;
-  lookAtContact = false;
   lookAtPortfolio = false;
   lookAtHome = true;
   $('#about-blurb').css('display', 'none');
@@ -383,29 +352,10 @@ function rotateShipGroup() {
   ship.lookAt(scene.position);
 }
 
-function goToContactDestination() {
-  group.rotation.y = 0;
-  var x = contactDestination.position.x;
-  var y = contactDestination.position.y;
-  var z = contactDestination.position.z;
-
-  ship.position.x = 55 + x;
-  ship.position.y = -40 + y;
-  ship.position.z = z;
-
-  ship.rotation.y = 0;
-
-  camera.position.x = 250 + x;
-  camera.position.y = 20 + y;
-  camera.position.z = z;
-
-  camera.lookAt(contactDestination.position);
-
-  camera.updateMatrixWorld();
-
+function goToAboutDestination() {
   $('#about-blurb').css('display', 'block');
-
 }
+
 
 function goToPortfolioDestination() {
 
@@ -441,14 +391,6 @@ function animate() {
 
 }
 
-function loopSea() {
-
-  sea.moveWaves();
-  renderer.render(scene, camera);
-  // save the result to more easily break the loop later
-  id = requestAnimationFrame(loopSea);
-  render();
-}
 function loopLand() {
 
   land.moveMountains();
@@ -467,9 +409,6 @@ function render() {
     rotateShipGroup();
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
     renderer.render(scene, camera);
-  }
-  else if (lookAtContact) {
-    goToContactDestination();
   }
   else if (lookAtPortfolio) {
     goToPortfolioDestination();
