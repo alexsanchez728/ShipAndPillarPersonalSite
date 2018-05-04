@@ -10,7 +10,7 @@ var id;
 
 var camera, scene, renderer;
 
-var ship, aboutDestination, contactDestination, portfolioDestination;
+var ship, aboutDestination, portfolioDestination;
 var group, shipGroup, destinationGroup;
 
 var targetRotation = 0;
@@ -24,7 +24,6 @@ var windowHalfX = window.innerWidth / 2;
 var SEPARATION = 60;
 var AMOUNTX = 50;
 var AMOUNTY = 50;
-var particle;
 
 init();
 animate();
@@ -72,25 +71,19 @@ function init() {
   var shipMaterial = new THREE.MeshBasicMaterial({ color: 0x4D63DB });
   ship = new THREE.Mesh(shipGeometry, shipMaterial);
   ship.position.set(100, 0, 100);
-  ship.castShadow = true;
+  // ship.castShadow = true;
   shipGroup.add(ship);
   // END SHIP LAYER
 
-  // CONTACT LAYER
-  var contactEmpty = new THREE.BoxGeometry(10, 10, 10);
-  contactDestination = new THREE.Mesh(contactEmpty);
-  contactDestination.position.set(-200, 300, 0);
-  destinationGroup.add(contactDestination);
-  // END CONTACT LAYER
-
   // PORTFOLIO LAYER
   var portfolioEmpty = new THREE.BoxGeometry(10, 10, 10);
-  portfolioDestination = new THREE.Mesh(contactEmpty);
+  portfolioDestination = new THREE.Mesh(portfolioEmpty);
   portfolioDestination.position.set(200, 300, 0);
   destinationGroup.add(portfolioDestination);
   // END PORTFOLIO LAYER
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  // pass { antialias: true } when ready to ship
+  renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
@@ -100,7 +93,7 @@ function init() {
   $(document).on('touchstart', onDocumentTouchStart);
   $(document).on('touchmove', onDocumentTouchMove);
 
-  $('#about-button').click(goToAboutDestination);
+  $('#about-button').click(onAboutButtonClick);
   $('#portfolio-button').click(onPortfolioButtonClick);
   $('#back-button').click(onBackButtonClick);
 
@@ -161,82 +154,64 @@ Floor.prototype.makeMountains = function () {
 };
 
 var floor;
-
 function createFloor() {
   floor = new Floor();
   floor.makeMountains();
   group.add(floor.mesh);
 }
 createFloor();
-
-
-function Land() {
-
-  // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-  var geom = new THREE.CylinderGeometry(250, 250, 1000, 20, 10);
-
-  // rotate the geometry on the x axis
-  geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-
-  geom.mergeVertices();
-  var l = geom.vertices.length;
-
-  this.mountains = [];
-
-  for (var i = 0; i < l; i++) {
-    var v = geom.vertices[i];
-    this.mountains.push({
-      y: v.y,
-      x: v.x,
-      z: v.z,
-      ang: Math.random() * Math.PI * 2,
-      amp: 7 + Math.random() * 15,
-      speed: 0.0006 + Math.random() * 0.0005
+class Land {
+  constructor() {
+    // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
+    var geom = new THREE.CylinderGeometry(250, 250, 1000, 20, 10);
+    geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+    geom.mergeVertices();
+    var l = geom.vertices.length;
+    this.mountains = [];
+    for (var i = 0; i < l; i++) {
+      var v = geom.vertices[i];
+      this.mountains.push({
+        y: v.y,
+        x: v.x,
+        z: v.z,
+        ang: Math.random() * Math.PI * 2,
+        amp: 7 + Math.random() * 15,
+        speed: 0.0006 + Math.random() * 0.0005
+      });
+    }
+    // create the material 
+    var mat = new THREE.MeshPhongMaterial({
+      color: 0x68c3c0,
+      transparent: true,
+      opacity: 1,
+      flatShading: true,
     });
+    this.mesh = new THREE.Mesh(geom, mat);
+    // this.mesh.receiveShadow = true;
   }
-
-  // create the material 
-  var mat = new THREE.MeshPhongMaterial({
-    color: 0x68c3c0,
-    transparent: true,
-    opacity: 1,
-    flatShading: true,
-  });
-
-  this.mesh = new THREE.Mesh(geom, mat);
-  this.mesh.receiveShadow = true;
+  moveMountains() {
+    var verts = this.mesh.geometry.vertices;
+    var l = verts.length;
+    for (var i = 0; i < l; i++) {
+      var v = verts[i];
+      var vprops = this.mountains[i];
+      v.x = vprops.x + Math.cos(vprops.ang) * vprops.amp;
+      v.y = vprops.y + Math.sin(vprops.ang) * vprops.amp;
+      vprops.ang += vprops.speed;
+      this.mesh.geometry.verticesNeedUpdate = true;
+      land.mesh.rotation.z += -0.00005;
+    }
+  }
 }
 
-Land.prototype.moveMountains = function () {
-  var verts = this.mesh.geometry.vertices;
-  var l = verts.length;
-
-  for (var i = 0; i < l; i++) {
-    var v = verts[i];
-    var vprops = this.mountains[i];
-
-    v.x = vprops.x + Math.cos(vprops.ang) * vprops.amp;
-    v.y = vprops.y + Math.sin(vprops.ang) * vprops.amp;
-
-    vprops.ang += vprops.speed;
-
-    this.mesh.geometry.verticesNeedUpdate = true;
-
-    land.mesh.rotation.z += -0.00005;
-  }
-};
-
 var land;
-
 function createLand() {
   land = new Land();
 
-  // push it a little bit at the bottom of the scene
   land.mesh.position.y = -150;
   land.mesh.position.x = 220;
 
-  // add the mesh of the sea to the scene
-  contactDestination.add(land.mesh);
+  scene.add(land.mesh);
 }
 
 
@@ -310,23 +285,33 @@ function onDocumentTouchMove(event) {
   }
 
 }
+function onAboutButtonClick(event) {
+  lookAtHome = false;
+  lookAtAbout = true;
+  goToAboutDestination();
 
+}
 
 function onPortfolioButtonClick(event) {
   lookAtHome = false;
   lookAtPortfolio = true;
-  createLand();
-  loopLand();
+  goToPortfolioDestination();
+
 }
 
 function onBackButtonClick(event) {
   lookAtAbout = false;
   lookAtPortfolio = false;
   lookAtHome = true;
-  $('#about-blurb').css('display', 'none');
 
-  animate();
+  scene.position.y = 0;
+  camera.position.set(0, 150, 500);
+  camera.lookAt(scene.position);
+
+  $('#about-blurb').css('display', 'none');
+  $('#portfolio-blurb').css('display', 'none');
 }
+
 
 function rotateCamera() {
 
@@ -353,11 +338,18 @@ function rotateShipGroup() {
 }
 
 function goToAboutDestination() {
+  camera.position.y = 80;
+  var updatedScene = scene;
+  updatedScene.position.y = scene.position.y += 80;
+  camera.lookAt(updatedScene.position);
+
   $('#about-blurb').css('display', 'block');
 }
 
-
 function goToPortfolioDestination() {
+
+  createLand();
+  // loopLand();
 
   group.rotation.y = 0;
   var x = portfolioDestination.position.x;
@@ -375,7 +367,6 @@ function goToPortfolioDestination() {
   camera.position.z = z;
 
   camera.lookAt(portfolioDestination.position);
-
   camera.updateMatrixWorld();
 
   $('#portfolio-blurb').css('display', 'block');
@@ -399,20 +390,18 @@ function loopLand() {
   id = requestAnimationFrame(loopLand);
   render();
 }
+
+
 function render() {
+  console.log(portfolioDestination);
 
-  if (lookAtHome) {
-
+  if (lookAtHome || lookAtAbout) {
     cancelAnimationFrame(id);
 
     rotateCamera();
     rotateShipGroup();
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
     renderer.render(scene, camera);
-  }
-  else if (lookAtPortfolio) {
-    goToPortfolioDestination();
-  }
 
-
+  }
 }
