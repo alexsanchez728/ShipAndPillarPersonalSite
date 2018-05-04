@@ -286,6 +286,10 @@ function onDocumentTouchMove(event) {
 
 }
 function onAboutButtonClick(event) {
+  $('#back-button').css('display', 'block');
+  $('#about-button').css('display', 'none');
+  $('#portfolio-button').css('display', 'none');
+
   lookAtHome = false;
   lookAtAbout = true;
   goToAboutDestination();
@@ -293,6 +297,10 @@ function onAboutButtonClick(event) {
 }
 
 function onPortfolioButtonClick(event) {
+  $('#back-button').css('display', 'block');
+  $('#about-button').css('display', 'none');
+  $('#portfolio-button').css('display', 'none');
+
   lookAtHome = false;
   lookAtPortfolio = true;
   goToPortfolioDestination();
@@ -304,12 +312,7 @@ function onBackButtonClick(event) {
   lookAtPortfolio = false;
   lookAtHome = true;
 
-  scene.position.y = 0;
-  camera.position.set(0, 150, 500);
-  camera.lookAt(scene.position);
-
-  $('#about-blurb').css('display', 'none');
-  $('#portfolio-blurb').css('display', 'none');
+  Reset();
 }
 
 
@@ -372,6 +375,22 @@ function goToPortfolioDestination() {
   $('#portfolio-blurb').css('display', 'block');
 
 }
+
+// RESET to home
+function Reset() {
+
+  scene.position.y = 0;
+  camera.position.set(0, 150, 500);
+  camera.lookAt(scene.position);
+
+  $('#about-button').css('display', 'block');
+  $('#portfolio-button').css('display', 'block');
+  $('#back-button').css('display', 'none');
+
+  $('#about-blurb').css('display', 'none');
+  $('#portfolio-blurb').css('display', 'none');
+}
+
 
 
 // ACTIVATION
