@@ -10,6 +10,8 @@ var id;
 
 var camera, scene, renderer;
 
+var ambientLight, shadowLight;
+
 var ship, aboutDestination, portfolioDestination;
 var group, shipGroup, destinationGroup;
 
@@ -37,17 +39,14 @@ function init() {
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x4C8BA8);
-  scene.fog = new THREE.FogExp2(0xB3937D, 0.0018);
+  scene.fog = new THREE.FogExp2(0xB3937D, 0.0016);
 
 
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1200);
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1500);
   camera.position.set(0, 150, 500);
   camera.lookAt(scene.position);
 
   scene.add(camera);
-
-  var light = new THREE.PointLight(0xffffff, 0.8);
-  camera.add(light);
 
   group = new THREE.Group();
   group.position.y = -300;
@@ -61,17 +60,19 @@ function init() {
 
   // ISLAND LAYER
   var landGeometry = new THREE.BoxGeometry(90, 550, 90);
-  var landMaterial = new THREE.MeshBasicMaterial({ color: 0xCF6A48 });
+  var landMaterial = new THREE.MeshPhongMaterial({ color: 0xCF6A48, shininess:0 });
   var cube = new THREE.Mesh(landGeometry, landMaterial);
+  cube.castShadow = true;
+  cube.receiveShadow = true;
   group.add(cube);
   // END ISLAND LAYER
 
   // SHIP LAYER
   var shipGeometry = new THREE.BoxGeometry(20, 10, 10);
-  var shipMaterial = new THREE.MeshBasicMaterial({ color: 0x4D63DB });
+  var shipMaterial = new THREE.MeshPhongMaterial({ color: 0x4D63DB });
   ship = new THREE.Mesh(shipGeometry, shipMaterial);
   ship.position.set(100, 0, 100);
-  // ship.castShadow = true;
+  ship.castShadow = true;
   shipGroup.add(ship);
   // END SHIP LAYER
 
@@ -81,11 +82,24 @@ function init() {
   portfolioDestination.position.set(200, 300, 0);
   destinationGroup.add(portfolioDestination);
   // END PORTFOLIO LAYER
-
+  createLights();
   // pass { antialias: true } when ready to ship
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
+  renderer.shadowMap.Enabled = true;
+  renderer.shadowMapSoft = false;
+  renderer.shadowCameraNear = 3;
+  renderer.shadowCameraFar = 500;
+  renderer.shadowCameraFov = 50;
+  renderer.shadowMapBias = 0.0039;
+  renderer.shadowMapDarkness = 0.5;
+  renderer.shadowMapWidth = 1024;
+  renderer.shadowMapHeight = 1024;
+
   container.appendChild(renderer.domElement);
 
 
@@ -129,6 +143,7 @@ function Floor() {
   var mat = new THREE.MeshPhongMaterial({
     color: 0x68c3c0,
     transparent: true,
+    reflectivity: 0,
     opacity: 1,
     flatShading: true,
   });
@@ -187,7 +202,7 @@ class Land {
       flatShading: true,
     });
     this.mesh = new THREE.Mesh(geom, mat);
-    // this.mesh.receiveShadow = true;
+    this.mesh.receiveShadow = true;
   }
   moveMountains() {
     var verts = this.mesh.geometry.vertices;
@@ -214,6 +229,35 @@ function createLand() {
   scene.add(land.mesh);
 }
 
+// LIGHTS
+function createLights() {
+
+  ambientLight = new THREE.AmbientLight(0xdc8874, 0.5);
+  scene.add(ambientLight);
+  
+  shadowLight = new THREE.DirectionalLight(0xffffff, 1);
+  shadowLight.castShadow = true;
+  shadowLight.position.set(-100, 300, 200);
+  shadowLight.target = group;
+  
+  shadowLight.shadow.camera.left = -200;
+  shadowLight.shadow.camera.right = 200;
+  shadowLight.shadow.camera.top = 300;
+  shadowLight.shadow.camera.bottom = -50;
+  shadowLight.shadow.mapSize.width = 2048;
+  shadowLight.shadow.mapSize.height = 2048;
+  shadowLight.shadow.camera.near = 1;
+  shadowLight.shadow.camera.far = 800;
+  shadowLight.shadow.Darkness = 0.2;
+
+  group.add(shadowLight);
+
+// // use when you need to see changes to the light
+// // calling CameraHelper on `{light name}.shadow.camera` exposes the area(the camera) of the light that will produce shadows
+//   var ch = new THREE.CameraHelper(shadowLight.shadow.camera);
+//   scene.add(ch);
+  
+}
 
 // EVENT LISTENERS
 
@@ -412,7 +456,7 @@ function loopLand() {
 
 
 function render() {
-  console.log(portfolioDestination);
+  // console.log("portfolio dest", portfolioDestination);
 
   if (lookAtHome || lookAtAbout) {
     cancelAnimationFrame(id);
