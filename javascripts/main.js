@@ -356,6 +356,9 @@ function render() {
 
     if (lookAtAbout) {
       landShipGroup();
+
+      shipGroup.rotation.y += (targetRotation - shipGroup.rotation.y) * 0.05;
+
     }
     else if (lookAtHome) {
       rotateShipGroup();
