@@ -4,7 +4,6 @@ var container;
 
 var lookAtHome = true;
 var lookAtAbout = false;
-var lookAtPortfolio = false;
 
 var id;
 
@@ -12,7 +11,7 @@ var camera, scene, renderer;
 
 var ambientLight, shadowLight;
 
-var ship, aboutDestination, portfolioDestination;
+var ship, aboutDestination;
 var group, shipGroup, destinationGroup;
 
 var targetRotation = 0;
@@ -76,13 +75,8 @@ function init() {
   shipGroup.add(ship);
   // END SHIP LAYER
 
-  // PORTFOLIO LAYER
-  var portfolioEmpty = new THREE.BoxGeometry(10, 10, 10);
-  portfolioDestination = new THREE.Mesh(portfolioEmpty);
-  portfolioDestination.position.set(200, 300, 0);
-  destinationGroup.add(portfolioDestination);
-  // END PORTFOLIO LAYER
   createLights();
+
   // pass { antialias: true } when ready to ship
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -92,13 +86,6 @@ function init() {
 
   renderer.shadowMap.Enabled = true;
   renderer.shadowMapSoft = false;
-  renderer.shadowCameraNear = 3;
-  renderer.shadowCameraFar = 500;
-  renderer.shadowCameraFov = 50;
-  renderer.shadowMapBias = 0.0039;
-  renderer.shadowMapDarkness = 0.5;
-  renderer.shadowMapWidth = 1024;
-  renderer.shadowMapHeight = 1024;
 
   container.appendChild(renderer.domElement);
 
@@ -108,7 +95,6 @@ function init() {
   $(document).on('touchmove', onDocumentTouchMove);
 
   $('#about-button').click(onAboutButtonClick);
-  $('#portfolio-button').click(onPortfolioButtonClick);
   $('#back-button').click(onBackButtonClick);
 
   $(window).on('resize', onWindowResize);
@@ -175,64 +161,11 @@ function createFloor() {
   group.add(floor.mesh);
 }
 createFloor();
-class Land {
-  constructor() {
-    // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-    var geom = new THREE.CylinderGeometry(250, 250, 1000, 20, 10);
-    geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    geom.mergeVertices();
-    var l = geom.vertices.length;
-    this.mountains = [];
-    for (var i = 0; i < l; i++) {
-      var v = geom.vertices[i];
-      this.mountains.push({
-        y: v.y,
-        x: v.x,
-        z: v.z,
-        ang: Math.random() * Math.PI * 2,
-        amp: 7 + Math.random() * 15,
-        speed: 0.0006 + Math.random() * 0.0005
-      });
-    }
-    // create the material 
-    var mat = new THREE.MeshPhongMaterial({
-      color: 0x68c3c0,
-      transparent: true,
-      opacity: 1,
-      flatShading: true,
-    });
-    this.mesh = new THREE.Mesh(geom, mat);
-    this.mesh.receiveShadow = true;
-  }
-  moveMountains() {
-    var verts = this.mesh.geometry.vertices;
-    var l = verts.length;
-    for (var i = 0; i < l; i++) {
-      var v = verts[i];
-      var vprops = this.mountains[i];
-      v.x = vprops.x + Math.cos(vprops.ang) * vprops.amp;
-      v.y = vprops.y + Math.sin(vprops.ang) * vprops.amp;
-      vprops.ang += vprops.speed;
-      this.mesh.geometry.verticesNeedUpdate = true;
-      land.mesh.rotation.z += -0.00005;
-    }
-  }
-}
-
-var land;
-function createLand() {
-  land = new Land();
-
-  land.mesh.position.y = -150;
-  land.mesh.position.x = 220;
-
-  scene.add(land.mesh);
-}
 
 // LIGHTS
 function createLights() {
 
-  ambientLight = new THREE.AmbientLight(0xdc8874, 0.5);
+  ambientLight = new THREE.AmbientLight(0xdc8874, 0.3);
   scene.add(ambientLight);
   
   shadowLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -340,20 +273,8 @@ function onAboutButtonClick(event) {
 
 }
 
-function onPortfolioButtonClick(event) {
-  $('#back-button').css('display', 'block');
-  $('#about-button').css('display', 'none');
-  $('#portfolio-button').css('display', 'none');
-
-  lookAtHome = false;
-  lookAtPortfolio = true;
-  goToPortfolioDestination();
-
-}
-
 function onBackButtonClick(event) {
   lookAtAbout = false;
-  lookAtPortfolio = false;
   lookAtHome = true;
 
   Reset();
@@ -386,37 +307,15 @@ function rotateShipGroup() {
 
 function goToAboutDestination() {
   camera.position.y = 80;
-  var updatedScene = scene;
-  updatedScene.position.y = scene.position.y += 80;
-  camera.lookAt(updatedScene.position);
+  var aboutScene = scene;
+  aboutScene.position.y = scene.position.y += 80;
+  camera.lookAt(aboutScene.position);
 
   $('#about-blurb').css('display', 'block');
 }
 
-function goToPortfolioDestination() {
-
-  createLand();
-  // loopLand();
-
-  group.rotation.y = 0;
-  var x = portfolioDestination.position.x;
-  var y = portfolioDestination.position.y;
-  var z = portfolioDestination.position.z;
-
-  ship.position.x = 55 + x;
-  ship.position.y = -45 + y;
-  ship.position.z = z;
-
-  ship.rotation.y = 0;
-
-  camera.position.x = 250 + x;
-  camera.position.y = 50 + y;
-  camera.position.z = z;
-
-  camera.lookAt(portfolioDestination.position);
-  camera.updateMatrixWorld();
-
-  $('#portfolio-blurb').css('display', 'block');
+function landShipGroup() {
+  ship.position.set(27, -20, 27);
 
 }
 
@@ -424,8 +323,11 @@ function goToPortfolioDestination() {
 function Reset() {
 
   scene.position.y = 0;
+
   camera.position.set(0, 150, 500);
   camera.lookAt(scene.position);
+
+  ship.position.set(100, 0, 100);
 
   $('#about-button').css('display', 'block');
   $('#portfolio-button').css('display', 'block');
@@ -445,24 +347,21 @@ function animate() {
 
 }
 
-function loopLand() {
-
-  land.moveMountains();
-  renderer.render(scene, camera);
-
-  id = requestAnimationFrame(loopLand);
-  render();
-}
-
 
 function render() {
-  // console.log("portfolio dest", portfolioDestination);
 
   if (lookAtHome || lookAtAbout) {
     cancelAnimationFrame(id);
-
     rotateCamera();
-    rotateShipGroup();
+
+    if (lookAtAbout) {
+      landShipGroup();
+    }
+    else if (lookAtHome) {
+      rotateShipGroup();
+    }
+
+
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
     renderer.render(scene, camera);
 

@@ -13,14 +13,12 @@ body {
   padding: 1.5%;
   text-align: center; }
 
-#back-button {
+#back-button, #about-button {
   top: 85%;
-  left: 46.5%;
-  display: none; }
+  left: 46.5%; }
 
-#about-button {
-  top: 48.5%;
-  left: 8.5%; }
+#back-button {
+  display: none; }
 
 #portfolio-button {
   top: 48.5%;
