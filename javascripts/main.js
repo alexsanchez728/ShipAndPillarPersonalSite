@@ -88,7 +88,6 @@ function init() {
 
   container.appendChild(renderer.domElement);
 
-
   $(document).on('mousedown', onDocumentMouseDown);
   $(document).on('touchstart', onDocumentTouchStart);
   $(document).on('touchmove', onDocumentTouchMove);
@@ -106,7 +105,7 @@ function Floor() {
   var geom = new THREE.PlaneGeometry(2500, 2500, 45, 45);
 
   // rotate the geometry on the x axis
-  geom.rotateX(- Math.PI / 2);
+  geom.rotateX(-Math.PI / 2);
 
   var l = geom.vertices.length;
 
@@ -261,38 +260,49 @@ function onDocumentTouchMove(event) {
   }
 }
 
-function onAboutButtonClick(event) {
-  $('#back-button').css('display', 'block');
-  $('#about-button').css('display', 'none');
-  $('#portfolio-button').css('display', 'none');
+function activateTransition() {
 
   if ($('#fader').hasClass('fade-transition')) {
 
     $('#fader').removeClass('fade-transition');
-    console.log("if we're here its true", $('#fader').hasClass('fade-transition'));
+    
+    console.log("if we're here its false", $('#fader').hasClass('fade-transition'));
+    $('#fader').addClass('fade-transition');
+    console.log("but here it should be true", $('#fader').hasClass('fade-transition'));
+
   } else {
     $('#fader').addClass('fade-transition');
   }
+}
 
-  lookAtHome = false;
-  lookAtAbout = true;
-  goToAboutDestination();
+function onAboutButtonClick(event) {
 
+  activateTransition();
+
+  setTimeout(() => {
+
+    $('#back-button').css('display', 'block');
+    $('#about-button').css('display', 'none');
+    $('#portfolio-button').css('display', 'none');
+
+    lookAtHome = false;
+    lookAtAbout = true;
+    goToAboutDestination();
+
+  }, 555);
 }
 
 function onBackButtonClick(event) {
 
-  if ($('#fader').hasClass('fade-transition')) {
+  activateTransition();
+  setTimeout(() => {
 
-    $('#fader').removeClass('fade-transition');
-    console.log("if we're here its ", $('#fader').hasClass('fade-transition'));
-  } else {
-    $('#fader').addClass('fade-transition');
-  }
-  lookAtAbout = false;
-  lookAtHome = true;
+    Reset();
+    lookAtAbout = false;
+    lookAtHome = true;
 
-  Reset();
+  }, 555);
+
 }
 
 
