@@ -254,31 +254,20 @@ function onDocumentTouchStart(event) {
 function onDocumentTouchMove(event) {
 
   if (event.touches.length == 1) {
-
     event.preventDefault();
 
     mouseX = event.touches[0].pageX - windowHalfX;
     targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
-
   }
 }
 
 function activateTransition() {
 
-  // if ($('#fader').hasClass('fade-transition')) {
-
     $('#fader').removeClass('fade-transition');
-    
-    console.log("if we're here its false", $('#fader').hasClass('fade-transition'));
-    // $('#fader').addClass('fade-transition');
-    console.log("but here it should be true", $('#fader').hasClass('fade-transition'));
-
-  // } else {
+    // just a short timeout to let it process that a class is being removed before giving it back
     setTimeout(() => {
-      
       $('#fader').addClass('fade-transition');
     }, fast);
-  // }
 }
 
 function onAboutButtonClick(event) {
@@ -286,7 +275,6 @@ function onAboutButtonClick(event) {
   activateTransition();
 
   setTimeout(() => {
-
     $('#back-button').css('display', 'block');
     $('#about-button').css('display', 'none');
     $('#portfolio-button').css('display', 'none');
@@ -302,13 +290,11 @@ function onBackButtonClick(event) {
 
   activateTransition();
   setTimeout(() => {
-
     Reset();
     lookAtAbout = false;
     lookAtHome = true;
 
   }, slow);
-
 }
 
 
