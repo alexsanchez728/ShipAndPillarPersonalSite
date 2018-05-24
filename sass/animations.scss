@@ -1,0 +1,39 @@
+.fade-transition {
+  animation: fadeToBlack 0.6s ease-in 1, fadeToBlack 0.6s 0.6s reverse 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeToBlack {
+  from {
+    background-color: inherit;
+    // opacity: 0;
+  }
+  to {
+    background-color: black;
+    // opacity: 1;
+  }
+}
+@-moz-keyframes fadeToBlack { /* Firefox */
+  from {
+    background-color: inherit;
+  }
+  to {
+    background-color: black;
+  }
+}
+@-webkit-keyframes fadeToBlack { /* Safari and Chrome */
+  from {
+    background-color: inherit;
+  }
+  to {
+    background-color: black;
+  }
+}
+@-o-keyframes fadeToBlack { /* Opera */
+  from {
+    background-color: inherit;
+  }
+  to {
+    background-color: black;
+  }
+}

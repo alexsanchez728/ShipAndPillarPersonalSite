@@ -1,9 +1,19 @@
+@import 'animations';
+
 body {
   font-family: Monospace;
-  background-color: #4C8BA8;
   margin: 0px;
   overflow: hidden;
 }
+#fader {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+  background-color: rgba(255,255,255,0);
+}
+
 #about-button, #contact-button, #portfolio-button, #back-button {
   position: absolute;
   background-color: Transparent;
