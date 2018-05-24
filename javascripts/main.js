@@ -26,6 +26,9 @@ var SEPARATION = 60;
 var AMOUNTX = 50;
 var AMOUNTY = 50;
 
+var fast = 15;
+var slow = 750;
+
 init();
 animate();
 
@@ -262,17 +265,20 @@ function onDocumentTouchMove(event) {
 
 function activateTransition() {
 
-  if ($('#fader').hasClass('fade-transition')) {
+  // if ($('#fader').hasClass('fade-transition')) {
 
     $('#fader').removeClass('fade-transition');
     
     console.log("if we're here its false", $('#fader').hasClass('fade-transition'));
-    $('#fader').addClass('fade-transition');
+    // $('#fader').addClass('fade-transition');
     console.log("but here it should be true", $('#fader').hasClass('fade-transition'));
 
-  } else {
-    $('#fader').addClass('fade-transition');
-  }
+  // } else {
+    setTimeout(() => {
+      
+      $('#fader').addClass('fade-transition');
+    }, fast);
+  // }
 }
 
 function onAboutButtonClick(event) {
@@ -289,7 +295,7 @@ function onAboutButtonClick(event) {
     lookAtAbout = true;
     goToAboutDestination();
 
-  }, 555);
+  }, slow);
 }
 
 function onBackButtonClick(event) {
@@ -301,7 +307,7 @@ function onBackButtonClick(event) {
     lookAtAbout = false;
     lookAtHome = true;
 
-  }, 555);
+  }, slow);
 
 }
 
