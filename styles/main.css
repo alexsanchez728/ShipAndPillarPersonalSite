@@ -1,8 +1,46 @@
+.fade-transition {
+  animation: fadeToBlack 0.8s ease-in 1, fadeToBlack 0.8s 0.8s reverse 1;
+  animation-fill-mode: forwards; }
+
+@keyframes fadeToBlack {
+  from {
+    background-color: inherit; }
+  to {
+    background-color: black; } }
+
+@-moz-keyframes fadeToBlack {
+  /* Firefox */
+  from {
+    background-color: inherit; }
+  to {
+    background-color: black; } }
+
+@-webkit-keyframes fadeToBlack {
+  /* Safari and Chrome */
+  from {
+    background-color: inherit; }
+  to {
+    background-color: black; } }
+
+@-o-keyframes fadeToBlack {
+  /* Opera */
+  from {
+    background-color: inherit; }
+  to {
+    background-color: black; } }
+
 body {
   font-family: Monospace;
-  background-color: #4C8BA8;
   margin: 0px;
   overflow: hidden; }
+
+#fader {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+  background-color: rgba(255, 255, 255, 0); }
 
 #about-button, #contact-button, #portfolio-button, #back-button {
   position: absolute;

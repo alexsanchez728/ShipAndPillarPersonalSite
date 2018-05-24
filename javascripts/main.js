@@ -26,6 +26,9 @@ var SEPARATION = 60;
 var AMOUNTX = 50;
 var AMOUNTY = 50;
 
+var fast = 15;
+var slow = 750;
+
 init();
 animate();
 
@@ -34,7 +37,6 @@ function init() {
 
   container = document.createElement('div');
   document.body.appendChild(container);
-
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x4C8BA8);
@@ -59,7 +61,7 @@ function init() {
 
   // ISLAND LAYER
   var landGeometry = new THREE.BoxGeometry(90, 550, 90);
-  var landMaterial = new THREE.MeshPhongMaterial({ color: 0xCF6A48, shininess:0 });
+  var landMaterial = new THREE.MeshPhongMaterial({ color: 0xCF6A48, shininess: 0 });
   var cube = new THREE.Mesh(landGeometry, landMaterial);
   cube.castShadow = true;
   cube.receiveShadow = true;
@@ -89,7 +91,6 @@ function init() {
 
   container.appendChild(renderer.domElement);
 
-
   $(document).on('mousedown', onDocumentMouseDown);
   $(document).on('touchstart', onDocumentTouchStart);
   $(document).on('touchmove', onDocumentTouchMove);
@@ -107,7 +108,7 @@ function Floor() {
   var geom = new THREE.PlaneGeometry(2500, 2500, 45, 45);
 
   // rotate the geometry on the x axis
-  geom.rotateX(- Math.PI / 2);
+  geom.rotateX(-Math.PI / 2);
 
   var l = geom.vertices.length;
 
@@ -167,12 +168,12 @@ function createLights() {
 
   ambientLight = new THREE.AmbientLight(0xdc8874, 0.3);
   scene.add(ambientLight);
-  
+
   shadowLight = new THREE.DirectionalLight(0xffffff, 1);
   shadowLight.castShadow = true;
   shadowLight.position.set(-100, 300, 200);
   shadowLight.target = group;
-  
+
   shadowLight.shadow.camera.left = -200;
   shadowLight.shadow.camera.right = 200;
   shadowLight.shadow.camera.top = 300;
@@ -185,11 +186,11 @@ function createLights() {
 
   group.add(shadowLight);
 
-// // use when you need to see changes to the light
-// // calling CameraHelper on `{light name}.shadow.camera` exposes the area(the camera) of the light that will produce shadows
-//   var ch = new THREE.CameraHelper(shadowLight.shadow.camera);
-//   scene.add(ch);
-  
+  // // use when you need to see changes to the light
+  // // calling CameraHelper on `{light name}.shadow.camera` exposes the area(the camera) of the light that will produce shadows
+  //   var ch = new THREE.CameraHelper(shadowLight.shadow.camera);
+  //   scene.add(ch);
+
 }
 
 // EVENT LISTENERS
@@ -253,31 +254,47 @@ function onDocumentTouchStart(event) {
 function onDocumentTouchMove(event) {
 
   if (event.touches.length == 1) {
-
     event.preventDefault();
 
     mouseX = event.touches[0].pageX - windowHalfX;
     targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
-
   }
-
 }
+
+function activateTransition() {
+
+    $('#fader').removeClass('fade-transition');
+    // just a short timeout to let it process that a class is being removed before giving it back
+    setTimeout(() => {
+      $('#fader').addClass('fade-transition');
+    }, fast);
+}
+
 function onAboutButtonClick(event) {
-  $('#back-button').css('display', 'block');
-  $('#about-button').css('display', 'none');
-  $('#portfolio-button').css('display', 'none');
 
-  lookAtHome = false;
-  lookAtAbout = true;
-  goToAboutDestination();
+  activateTransition();
 
+  setTimeout(() => {
+    $('#back-button').css('display', 'block');
+    $('#about-button').css('display', 'none');
+    $('#portfolio-button').css('display', 'none');
+
+    lookAtHome = false;
+    lookAtAbout = true;
+    goToAboutDestination();
+
+  }, slow);
 }
 
 function onBackButtonClick(event) {
-  lookAtAbout = false;
-  lookAtHome = true;
 
-  Reset();
+  activateTransition();
+  setTimeout(() => {
+    Reset();
+    lookAtAbout = false;
+    lookAtHome = true;
+
+  }, slow);
 }
 
 
