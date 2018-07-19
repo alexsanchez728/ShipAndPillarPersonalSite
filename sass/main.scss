@@ -30,18 +30,53 @@ body {
 #back-button {
     display: none;
 }
-
 #portfolio-button {
   top: 48.5%;
   right: 8.5%;
 }
-#about-blurb, #portfolio-blurb {
+#about-blurb { // , #portfolio-blurb
   display: none;
   position: absolute;
   width: 50%;
   margin-left: 25%;
   text-align: center;
 }
+
+#portfolio-blurb {
+  font-size: 2em;
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  display: flex;
+  flex-wrap: wrap;
+  right: 15%;
+
+  > div {
+    > h5 {
+      background-color: white;
+      min-width: 250px;
+      margin-top: 0;
+      padding-left: 5px;
+      }
+    width: 300px;
+    height: 100px;
+    min-height: 7em;
+    // border-bottom: 2px solid black;
+    // ^^ this is just for me to see the box im building
+    border-left: 2px solid black;
+  }
+
+  .portfolio-box:nth-child(2n) {
+    border-right: 2px solid black;
+  }
+
+  .portfolio-box:first-of-type, .portfolio-box:last-of-type {
+    flex: 1 1 auto;
+  }
+}
+
+
+
 footer {
   position: absolute;
   bottom: 0;

@@ -4,6 +4,7 @@ var container;
 
 var lookAtHome = true;
 var lookAtAbout = false;
+var lookAtPortfolio = false;
 
 var id;
 
@@ -11,7 +12,7 @@ var camera, scene, renderer;
 
 var ambientLight, shadowLight;
 
-var ship, aboutDestination;
+var ship, aboutDestination, portfolioDestination;
 var group, shipGroup, destinationGroup;
 
 var targetRotation = 0;
@@ -77,6 +78,13 @@ function init() {
   shipGroup.add(ship);
   // END SHIP LAYER
 
+  // PORTFOLIO LAYER
+  var portfolioEmpty = new THREE.BoxGeometry(10, 10, 10);
+  portfolioDestination = new THREE.Mesh(portfolioEmpty);
+  portfolioDestination.position.set(200, 300, 0);
+  destinationGroup.add(portfolioDestination);
+  // END PORTFOLIO LAYER
+
   createLights();
 
   // pass { antialias: true } when ready to ship
@@ -95,6 +103,7 @@ function init() {
   $(document).on('touchstart', onDocumentTouchStart);
   $(document).on('touchmove', onDocumentTouchMove);
 
+  $('#portfolio-button').click(onPortfolioButtonClick);
   $('#about-button').click(onAboutButtonClick);
   $('#back-button').click(onBackButtonClick);
 
@@ -286,12 +295,24 @@ function onAboutButtonClick(event) {
   }, slow);
 }
 
+function onPortfolioButtonClick(event) {
+  $('#back-button').css('display', 'block');
+  $('#about-button').css('display', 'none');
+  $('#portfolio-button').css('display', 'none');
+
+  lookAtHome = false;
+  lookAtPortfolio = true;
+  goToPortfolioDestination();
+
+}
+
 function onBackButtonClick(event) {
 
   activateTransition();
   setTimeout(() => {
     Reset();
     lookAtAbout = false;
+    lookAtPortfolio = false;
     lookAtHome = true;
 
   }, slow);
@@ -333,11 +354,50 @@ function goToAboutDestination() {
 
 function landShipGroup() {
   ship.position.set(27, -20, 27);
+}
+
+function goToPortfolioDestination() {
+
+  // createRollingHills();
+
+  group.rotation.y = 0;
+  var x = portfolioDestination.position.x;
+  var y = portfolioDestination.position.y;
+  var z = portfolioDestination.position.z;
+
+  ship.position.x = 55 + x;
+  ship.position.y = -85 + y;
+  ship.position.z = z;
+
+  ship.rotation.y = 0;
+  ship.rotation.z = 10;
+
+  camera.position.x = -250 + x;
+  camera.position.y = 50 + y;
+  camera.position.z = z;
+
+
+  camera.lookAt(portfolioDestination.position);
+
+  camera.updateMatrixWorld();
+
+  $('#portfolio-blurb').css('display', 'block');
 
 }
 
+
 // RESET to home
 function Reset() {
+
+  // if (rollingHills != undefined) {
+  //   console.log('parent?', portfolioDestination.children);
+  //   console.log('before attempted deletion', rollingHills);
+  //   var toDelete = scene.getObjectByName( "rollingHills" );
+  //   console.log('by name', toDelete);
+
+  //   portfolioDestination.remove(toDelete);
+  // }
+  // console.log('after attempted deletion', rollingHills);
 
   scene.position.y = 0;
 
@@ -364,26 +424,32 @@ function animate() {
 
 }
 
+function loopHills() {
+  // console.log("yikes");
+}
+
 
 function render() {
 
   if (lookAtHome || lookAtAbout) {
     cancelAnimationFrame(id);
-    rotateCamera();
+    // ^this stops the mountains rotation, not the amp changes, also won't delete it
+    
+    // rotateCamera();
 
     if (lookAtAbout) {
       landShipGroup();
-
       shipGroup.rotation.y += (targetRotation - shipGroup.rotation.y) * 0.05;
-
     }
     else if (lookAtHome) {
       rotateShipGroup();
     }
-
-
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
-    renderer.render(scene, camera);
 
+  } else if (lookAtPortfolio) {
+    loopHills();
   }
+
+  renderer.render(scene, camera);
+
 }
