@@ -74,13 +74,14 @@ body {
   position: absolute;
   top: 10%;
   left: 15%;
+  right: 15%;
   display: flex;
-  flex-wrap: wrap;
-  right: 15%; }
+  flex-wrap: wrap; }
   #portfolio-blurb > div {
     width: 300px;
     height: 100px;
     min-height: 7em;
+    border-bottom: 2px solid black;
     border-left: 2px solid black; }
     #portfolio-blurb > div > h5 {
       background-color: white;
