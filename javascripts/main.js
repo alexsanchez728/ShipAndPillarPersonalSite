@@ -170,7 +170,7 @@ function createFloor() {
   floor.makeMountains();
   group.add(floor.mesh);
 }
-createFloor();
+// createFloor();
 
 // LIGHTS
 function createLights() {
@@ -442,7 +442,7 @@ function render() {
       shipGroup.rotation.y += (targetRotation - shipGroup.rotation.y) * 0.05;
     }
     else if (lookAtHome) {
-      rotateShipGroup();
+      // rotateShipGroup();
     }
     group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
 

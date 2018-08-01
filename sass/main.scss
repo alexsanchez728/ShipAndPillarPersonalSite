@@ -50,6 +50,7 @@ body {
   right: 15%;
   display: flex;
   flex-wrap: wrap;
+  z-index: 1000;
 
   > div {
     > h5 {
